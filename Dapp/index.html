@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>CryptoMonsters front-end</title>
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+    <style>
+		.parent {
+			position: relative;
+			top: 0;
+			left: 0;
+		}
+		.image1 {
+			position: relative;
+		    top: 0;
+		    left: 0;
+		    border: none;
+		    width: 600px;
+		}
+		.image2 {
+		    position: absolute;
+		    top: 10px;
+		    left: 87px;
+		    border: none;
+		    width: 400px;
+		    height: 400px;
+		}
+	</style>
+  </head>
+  <body>
+  	<div id="txStatus"></div>
+  	<div>
+		<label for="userAcc">Eth User Account:</label>
+		<input type="number" id="userAcc" name="userAcc"><br><br>
+		<button id="changeAccount">Change User Account</button>
+	<div>
+    <div id="monsters"></div>
+    <div id="Create Monster">
+    	<button id="button">Create Monster</button>
+    </div>
+    <div id="Show Monsters">
+    	<button id="showMonsters">Show User Monsters</button>
+    </div>
+    <div id="Show All Monsters">
+    	<button id="showAllMonsters">Show All Monsters</button>
+    </div>
+    <div id="Show All Sellable Monsters">
+    	<button id="showAllSellableMonsters">Show All Sellable Monsters</button>
+    </div>
+
+    <script>
+    	var NAMES = ["Duende", "Gnomo" , "Goblin", "Espectro", "Criatura", "Espanto", "Ser", "Aparición", "Demonio", "Monstruo", "Reptil", "Zombie", "Orco", "Troll", "Gremlin", "Trasgo"];
+    	var SURNAMES = ["hediondo", "de fuego",  "horrible", "sucio", "maléfico", "espeluznante", "artero", "malvado", "asqueroso", "de hielo", "de viento", "de agua", "gris", "furioso", "destripador", "lunático"];
+		var cryptoMonsters;
+		var userAccount;
+
+		function startApp() {
+			var cryptoMonstersAddress = "0x34F95B4c090e9f6B2C9De3945927DCf4503A72Aa";
+			cryptoMonsters = new web3.eth.Contract([{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"monsterId","type":"uint256"},{"indexed":false,"internalType":"uint16","name":"dna","type":"uint16"}],"name":"NewMonster","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"balance","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"buyMonster","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"createMonster","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint16","name":"_dna","type":"uint16"}],"name":"dnaToId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"operator","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getCreateFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getMonsterCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"}],"name":"getMonstersByOwner","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"makeMonsterSellable","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_price","type":"uint256"},{"internalType":"uint256","name":"_id","type":"uint256"}],"name":"makeMonsterSellableForPrice","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"monsterToOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"monsters","outputs":[{"internalType":"uint256","name":"price","type":"uint256"},{"internalType":"bool","name":"sellable","type":"bool"},{"internalType":"uint16","name":"dna","type":"uint16"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bytes","name":"","type":"bytes"}],"name":"onERC721Received","outputs":[{"internalType":"bytes4","name":"","type":"bytes4"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"owner","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"_approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_fee","type":"uint256"}],"name":"setCreateFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+				, cryptoMonstersAddress);
+
+			cryptoMonsters.events.Transfer({ filter: { to: userAccount } })
+				.on("data", function(event) {
+					let data = event.returnValues;
+					getMonstersByOwner(userAccount).then(displayMonsters);
+				})
+				.on("error", console.error);
+		}
+
+		function displayMonsters(ids) {
+			$("#txStatus").empty();
+			$("#monsters").empty();
+			$('#monsters').append('<h1>Monsters for user: ' + userAccount + '</h1>');
+			for (id of ids) {
+				getMonsterDetails(id)
+				.then(function(monster) {
+					var dnaHexString = ('0000' + monster.dna.toString(16).toUpperCase()).slice(-4);
+					var monsterNumber = dnaHexString.charAt(0);
+					var background = dnaHexString.charAt(1);
+					var name = parseInt("0x" + dnaHexString.charAt(2));
+					var surname = parseInt("0x" + dnaHexString.charAt(3));
+					$('#monsters').append('<div id=' + monster.dna + '></div>');
+					$('#' + monster.dna).append(
+						`<div class="parent">
+						<img class="image1" src="img/backgrounds/${background}.png" />
+						<img class="image2" src="img/monsters/monster_${monsterNumber}.png" />
+						</div>
+						<h2>${ NAMES[name] + " " + SURNAMES[surname] + ". Precio: $" + monster.price + " wei. Vendible: " + monster.sellable }</h2>`
+					);
+					$('#' + monster.dna).append(`<button id="${monster.dna + 'sellbutton'}">Make sellable for ${monster.price} Wei:</button>`);
+					//<input type="number" id="${monster.dna + 'priceInput'}">`);
+					element1 = document.getElementById(monster.dna + 'sellbutton');
+					element1.addEventListener("click", function() {
+						dnaToId(monster.dna).then(function(monsterId){
+							//makeMonsterSellable($('#' + monster.dna + 'priceInput').val(), monsterId);
+							makeMonsterSellable(monsterId);
+							getMonstersByOwner(userAccount).then(displayMonsters);
+						})
+					});
+				});
+			}
+      	}
+
+      	function displayAllMonsters(showOnlySelleable) {
+      		$("#txStatus").empty();
+      		$("#monsters").empty();
+      		cryptoMonsters.methods.getMonsterCount().call().then(function(length){
+      			for (var id = 0; id < length; ++id) {
+					getMonsterDetails(id)
+					.then(function(monster) {
+						if (showOnlySelleable === true && monster.sellable === false) {
+							return;
+						}
+						var dnaHexString = ('0000' + monster.dna.toString(16).toUpperCase()).slice(-4);
+						var monsterNumber = dnaHexString.charAt(0);
+						var background = dnaHexString.charAt(1);
+						var name = parseInt("0x" + dnaHexString.charAt(2));
+						var surname = parseInt("0x" + dnaHexString.charAt(3));
+						$('#monsters').append('<div id=' + monster.dna + '></div>');
+						$('#' + monster.dna).append(
+							`<div class="parent">
+							<img class="image1" src="img/backgrounds/${background}.png" />
+							<img class="image2" src="img/monsters/monster_${monsterNumber}.png" />
+							</div>
+							<h2>${ NAMES[name] + " " + SURNAMES[surname] + ". Precio: $" + monster.price + "wei. Vendible: " + monster.sellable }</h2>`
+						);
+						if (monster.sellable === true) {
+							dnaToId(monster.dna).then(monsterId => monsterToOwner(monsterId)).then(function(owner) {
+								if (userAccount != owner) {
+									var price = web3.utils.fromWei(monster.price, "ether");
+									$('#' + monster.dna).append(
+										`<button id="${monster.dna + 'buyButton'}">Buy Monster for ${price} ether</button>`
+									);
+									element1 = document.getElementById(monster.dna + 'buyButton');
+									element1.addEventListener("click", function() {
+										dnaToId(monster.dna).then(function(monsterId){
+											buyMonster(monsterId, monster.price);
+											getMonstersByOwner(userAccount).then(displayMonsters);
+										})
+									});
+								} else {
+									$('#' + monster.dna).append(`<h3 id="${monster.dna + 'owned'}">You own the above monster</h3>`);
+								}
+							});
+						}
+					});
+				}
+      		});
+      	}
+
+		function createRandomMonster() {
+			$("#txStatus").text("Creating new monster on the blockchain. This may take a while...");
+			return cryptoMonsters.methods.createMonster()
+				.send({ from: userAccount, gas: 6721975 , value: web3.utils.toWei("0.001", "ether") })
+				.on("receipt", function(receipt) {
+					$("#txStatus").text("Successfully created monster!");
+					getMonstersByOwner(userAccount).then(displayMonsters);
+				})
+				.on("error", function(error) {
+					console.log(error);
+					$("#txStatus").text("Could not create a Monster. It is possible you already own one, or maybe some other problem.");
+				});
+		}
+
+
+		$('#changeAccount').click(function(){
+			web3.eth.getAccounts().then(function(result){
+				userAccount = result[$('#userAcc').val()];
+				getMonstersByOwner(userAccount).then(displayMonsters);
+        	});
+		});
+
+		$("#button").click(function() {
+            createRandomMonster();
+        });
+
+        $("#showMonsters").click(function() {
+			getMonstersByOwner(userAccount).then(displayMonsters);
+        });
+
+        $("#showAllMonsters").click(function() {
+			displayAllMonsters(false);
+        });
+
+        $("#showAllSellableMonsters").click(function() {
+			displayAllMonsters(true);
+        });
+
+		function getMonsterDetails(id) {
+			return cryptoMonsters.methods.monsters(id).call();
+		}
+
+		function monsterToOwner(id) {
+			return cryptoMonsters.methods.monsterToOwner(id).call();
+		}
+
+		function getMonstersByOwner(owner) {
+			return cryptoMonsters.methods.getMonstersByOwner(owner).call();
+		}
+
+		function makeMonsterSellable(id) {
+			//return cryptoMonsters.methods.makeMonsterSellable(price, id).send({ from: userAccount, gas: 6721975 });
+			return cryptoMonsters.methods.makeMonsterSellable(id).send({ from: userAccount, gas: 6721975 });
+		}
+
+		function dnaToId(dna) {
+			return cryptoMonsters.methods.dnaToId(dna).call();
+		}
+
+		function buyMonster(id, price) {
+			return cryptoMonsters.methods.buyMonster(id).send({ from: userAccount, gas: 6721975, value: price});
+		}
+
+		window.ethereum.on('accountsChanged', function (accounts) {
+			ethereum.request({ method: 'eth_requestAccounts' }).then(function(accounts) {
+				userAccount = accounts[0];
+				getMonstersByOwner(userAccount).then(displayMonsters);
+			});
+		})
+
+    	window.addEventListener('load', function() {
+    		if (typeof window.ethereum !== 'undefined') {
+				console.log('MetaMask is installed!');
+				ethereum.request({ method: 'eth_requestAccounts' }).then(function(accounts) {
+					userAccount = accounts[0];
+				});
+				web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:7545'));
+			} else {
+				$("#txStatus").text('MetaMask is not installed! Fallback to the the Eth User Account input box to change accounts!');
+				web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:7545'));
+				web3.eth.getAccounts().then(function(result){
+					userAccount = result[0];
+        		});
+			}
+			startApp()
+		})
+    </script>
+  </body>
+</html>
