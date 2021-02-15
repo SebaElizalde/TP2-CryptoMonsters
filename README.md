@@ -3,7 +3,7 @@
 Pasos para ejecutar.
 
 1) Crear nodo local con ganache.
-2) Deployar el contrato. Copiar su dirección.
+2) Deployar el contrato MonsterOwnership. Copiar su dirección.
 3) Editar el archivo index.html. Asignar la variable cryptoMonstersAddress (en la línea 59) a la dirección del contrato.
 4) En el explorador web, agregar a Metamask las cuentas que se vayan a utilizar.
 5) Dentro de la carpeta Dapp, iniciar un servidor de http. Por ejemplo, con:
